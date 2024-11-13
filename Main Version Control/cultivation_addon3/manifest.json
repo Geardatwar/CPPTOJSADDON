@@ -1,0 +1,25 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Cultivation System",
+    "description": "A cultivation system add-on",
+    "uuid": "9983106d-5e0f-4592-98c5-d137127f3329",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 0]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "9eb0ae42-f0b8-4cfc-b111-fdc699a3b183",
+      "version": [1, 0, 0],
+      "entry": "scripts/cultivation_manager.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "1.15.0"
+    }
+  ]
+}
