@@ -1,0 +1,30 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Cultivation System Behavior",
+    "description": "Cultivation System Behavior Pack",
+    "uuid": "997685fb-8777-449d-8c9a-742e985da868",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 0]
+  },
+  "modules": [
+    {
+      "type": "data",
+      "uuid": "60ea9968-aa96-4883-b6c5-a010905817ea",
+      "version": [1, 0, 0]
+    },
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "c9be6c62-271a-4f3e-acf7-abc96e7d7c93",
+      "version": [1, 0, 0],
+      "entry": "scripts/cultivation_system.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "1.15"
+    }
+  ]
+}
