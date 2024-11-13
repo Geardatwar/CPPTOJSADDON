@@ -1,13 +1,25 @@
+   /*
+      Project id: Final Project   
+      Project Name: Bedrock Cultivation Addon With CPP Function
+      Programmer: Jeremy Bock
+      Date: November 12, 2024
+      Description: This program allows the player to cultivate to the Nacent Soul realm to get stronger. 
+      It also creates a strong enemy to fight against and uses a cpp function to determine if the player revieves enlightenment.
+  */
+
+//Required for world and system calls
 import { world, system } from "@minecraft/server";
 
-// Import the enlightenment calculator module
+//The converted CPP file
 import { EnlightenmentCalculator } from "./enlightenmentCalculatorModule.js";
+
 
 let enlightenmentState = {
     calculator: null,
     isInitialized: false,
 };
 
+//Intializing our module with using async await to make sure it loads before the rest of the code is executed
 async function initializeEnlightenmentCalculator() {
     try {
         await EnlightenmentCalculator.initialize();
@@ -36,6 +48,7 @@ function checkEnlightenmentStatus(chance) {
     }
 }
 
+//Using this which is a pointer and a class to store data
 class CultivationSystem {
     constructor(savedData = null) {
         this.power = savedData ? savedData.power : 0;
@@ -55,6 +68,7 @@ class CultivationSystem {
         this.isAlive = true;
     }
 
+    //Storing the result of the imported function
     checkEnlightenment() {
         this.isEnlightened = checkEnlightenmentStatus(this.enlightenmentChance);
         return this.isEnlightened;
@@ -74,7 +88,7 @@ class CultivationSystem {
       const currentStageIndex = this.stages.findIndex(s => s.name === currentStage.name);
       
       if (currentStageIndex === this.stages.length - 1) {
-          return 100; // Already at max stage
+          return 100; //Already at max stage
       }
 
       const nextStage = this.stages[currentStageIndex + 1];
@@ -89,7 +103,7 @@ class CultivationSystem {
       const currentStageIndex = this.stages.findIndex(s => s.name === currentStage.name);
       
       if (currentStageIndex === this.stages.length - 1) {
-          return 0; // No percentage if at max stage
+          return 0; //No percentage if at max stage
       }
 
       const nextStage = this.stages[currentStageIndex + 1];
@@ -102,7 +116,7 @@ class CultivationSystem {
       const oldStage = this.getCurrentStage();
       const finalAmount = this.isEnlightened ? Math.floor(amount * this.enlightenmentBonus) : amount;
       
-      // Calculate percentage this power gain represents
+      //Calculate percentage this power gain represents
       const percentageGained = this.calculatePowerToPercentage(finalAmount);
       
       this.power += finalAmount;
@@ -124,7 +138,7 @@ class CultivationSystem {
   }
 }
 
-// Initialize the system with the enlightenment calculator
+//Initialize the system with the enlightenment calculator
 system.run(async () => {
     const moduleInitialized = await initializeEnlightenmentCalculator();
     if (moduleInitialized) {
@@ -133,7 +147,6 @@ system.run(async () => {
         world.sendMessage("§eCultivation System initialized with basic enlightenment calculations.");
     }
 
-    // Load saved data and continue with initialization
     const savedData = loadAllData();
     for (const player of world.getAllPlayers()) {
         if (savedData[player.id]) {
@@ -142,6 +155,7 @@ system.run(async () => {
     }
 });
 
+//Using data structure to store state
 const cultivationSystems = new Map();
 const recentlyDiedPlayers = new Map();
 
@@ -171,11 +185,11 @@ function loadAllData() {
             return {};
         }
         const data = JSON.parse(savedDataStr);
-        // Validate and migrate old data format if necessary
+        //Validate and migrate old data format if necessary
         const migratedData = {};
         for (const [playerId, savedState] of Object.entries(data)) {
             if (typeof savedState === 'number') {
-                // Old format - just power
+                //Old format - just power
                 migratedData[playerId] = {
                     power: savedState,
                     meditationTime: 0,
@@ -184,7 +198,7 @@ function loadAllData() {
                     isEnlightened: false
                 };
             } else {
-                // New format
+                //New format
                 migratedData[playerId] = savedState;
             }
         }
@@ -195,7 +209,7 @@ function loadAllData() {
     }
 }
 
-// Function to spawn custom Rogue Cultivator in random location around player
+//Function to spawn custom Rogue Cultivator in random location around player
 function spawnRogueCultivatorAroundPlayer(player) {
     try {
         const system = cultivationSystems.get(player.id);
@@ -203,6 +217,7 @@ function spawnRogueCultivatorAroundPlayer(player) {
             return;
         }
 
+        //To spawn the enemy in a circle around the player
         const angle = Math.random() * 2 * Math.PI;
         const distance = Math.random() * 3;
 
@@ -215,7 +230,7 @@ function spawnRogueCultivatorAroundPlayer(player) {
         const vindicator = player.dimension.spawnEntity("minecraft:vindicator", spawnPos);
         vindicator.nameTag = "Rogue Cultivator";
         
-        // Using direct commands on the vindicator entity
+        //Using direct commands on the vindicator entity
         player.runCommand(`effect @e[name="Rogue Cultivator",r=5] health_boost 999999 4 true`);
         player.runCommand(`effect @e[name="Rogue Cultivator",r=5] instant_health 1 255 true`);
         player.runCommand(`effect @e[name="Rogue Cultivator",r=5] strength 999999 0 true`);
@@ -226,7 +241,7 @@ function spawnRogueCultivatorAroundPlayer(player) {
     }
 }
 
-// Load saved data on world start
+//Load saved data on world start
 system.run(() => {
     const savedData = loadAllData();
     for (const player of world.getAllPlayers()) {
@@ -236,12 +251,12 @@ system.run(() => {
     }
 });
 
-// Update the entity death handler
+//Update the entity death handler
 world.beforeEvents.playerLeave.subscribe((eventData) => {
     saveAllData();
 });
 
-// Modified death handler
+//Reset cultivation when dead
 world.afterEvents.entityDie.subscribe((eventData) => {
     try {
         const player = eventData.deadEntity;
@@ -252,7 +267,7 @@ world.afterEvents.entityDie.subscribe((eventData) => {
                 system.meditationTime = 0;
                 system.isInBreakthrough = false;
                 system.isAlive = false;
-                system.isEnlightened = false;  // Reset enlightenment
+                system.isEnlightened = false;  
                 recentlyDiedPlayers.set(player.id, true);
                 saveAllData();
             }
@@ -262,7 +277,7 @@ world.afterEvents.entityDie.subscribe((eventData) => {
     }
 });
 
-// Update spawn handler to properly reset meditation state
+//Update spawn handler to properly reset meditation state
 world.afterEvents.playerSpawn.subscribe((eventData) => {
     const player = eventData.player;
     
@@ -282,7 +297,7 @@ world.afterEvents.playerSpawn.subscribe((eventData) => {
         player.onScreenDisplay.setTitle(`§a Press enter to open chat`);
     } 
 
-    // Reset meditation state on spawn
+    //Reset meditation state on spawn
     const system = cultivationSystems.get(player.id);
     if (system) {
         system.isAlive = true;
@@ -297,7 +312,7 @@ world.afterEvents.playerSpawn.subscribe((eventData) => {
     }
 });
 
-// Update damage handler
+//Update damage handler
 world.afterEvents.entityHitEntity.subscribe((eventData) => {
     try {
         const source = eventData.damagingEntity;
@@ -315,14 +330,14 @@ world.afterEvents.entityHitEntity.subscribe((eventData) => {
     }
 });
 
-// Update the applyCombatModifiers function to be more robust
+
 function applyCombatModifiers(player, stage) {
     try {
-        // Apply strength effect based on damageBonus from the player's current stage
+        //Apply strength effect based on damageBonus from the player's current stage
         if (stage.damageBonus > 0) {
             player.runCommand(`effect @s strength 999999 ${stage.damageBonus - 1} true`);
         }
-        // Apply resistance effect based on defenseBonus from the player's current stage
+        //Apply resistance effect based on defenseBonus from the player's current stage
         if (stage.defenseBonus > 0) {
             player.runCommand(`effect @s resistance 999999 ${stage.defenseBonus - 1} true`);
         }
@@ -331,27 +346,26 @@ function applyCombatModifiers(player, stage) {
     }
 }
 
-// Autosave interval
+//Autosave interval
 system.runInterval(() => {
     if (world.getAllPlayers().length > 0) {
         saveAllData();
     }
 }, 200);
 
-// Spawn Rogue Cultivator interval
+//Spawn Rogue Cultivator interval
 system.runInterval(() => {
     for (const player of world.getAllPlayers()) {
         spawnRogueCultivatorAroundPlayer(player);
     }
 }, 500);
 
-// Meditation tick handler
-// Update meditation tick handler to check isAlive
+//Meditation tick handler
 system.runInterval(() => {
     for (const player of world.getAllPlayers()) {
         try {
             const system = cultivationSystems.get(player.id);
-            if (!system || !system.isAlive) continue;  // Skip if system doesn't exist or player is dead
+            if (!system || !system.isAlive) continue;  //Skip if system doesn't exist or player is dead
 
             const currentStage = system.getCurrentStage();
             applyCombatModifiers(player, currentStage);
@@ -372,7 +386,7 @@ system.runInterval(() => {
                         const powerGain = Math.floor(Math.random() * 10) + 15;
                         const result = system.addPower(powerGain);
                         
-                        // Calculate actual stage progress
+                        //Calculate actual stage progress
                         const stageProgress = system.getProgressToNextStage();
                         const nextStageIndex = system.stages.findIndex(s => s.name === currentStage.name) + 1;
                         
@@ -404,7 +418,7 @@ system.runInterval(() => {
     }
 }, 1);
 
-// Initialize message
+//Initialize message
 system.run(() => {
     world.sendMessage("§aCultivation System initialized!");
 });
