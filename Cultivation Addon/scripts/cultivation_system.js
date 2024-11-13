@@ -235,7 +235,7 @@ function spawnRogueCultivatorAroundPlayer(player) {
         player.runCommand(`effect @e[name="Rogue Cultivator",r=5] instant_health 1 255 true`);
         player.runCommand(`effect @e[name="Rogue Cultivator",r=5] strength 999999 0 true`);
         player.runCommand(`effect @e[name="Rogue Cultivator",r=5] resistance 999999 0 true`);
-        player.sendMessage("§c A Rogue Cultivator Found You!");
+        player.sendMessage("§cA Rogue Cultivator Found You!");
     } catch (error) {
         console.warn(`Error spawning Rogue Cultivator: ${error}`);
     }
